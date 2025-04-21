@@ -4,12 +4,61 @@
   <meta charset="UTF-8">
   <title>使用量差異計算器</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 30px; background: #fdf8f3; }
-    label, select, input { display: block; margin: 10px 0; }
-    .result { margin-top: 20px; padding: 15px; background: #fff8e1; border: 1px solid #ffa726; border-radius: 5px; }
-    .warning { color: red; font-weight: bold; }
-    .ok { color: green; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background: #fdf8f3;
+      font-size: 18px;
+      line-height: 1.6;
+      max-width: 500px;
+      margin: auto;
+    }
+  
+    label {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  
+    input, select {
+      font-size: 18px;
+      padding: 8px 12px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
+  
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin-top: 20px;
+      cursor: pointer;
+      background-color: #ffa726;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+    }
+  
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      background: #fff8e1;
+      border: 1px solid #ffa726;
+      border-radius: 5px;
+      font-size: 17px;
+    }
+  
+    .warning {
+      color: red;
+      font-weight: bold;
+    }
+  
+    .ok {
+      color: green;
+      font-weight: bold;
+    }
   </style>
+  
 </head>
 <body>
   <h2>使用量差異計算器</h2>
