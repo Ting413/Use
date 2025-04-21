@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>使用量差異計算器</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; background: #fdf8f3; }
+    label, select, input { display: block; margin: 10px 0; }
+    .result { margin-top: 20px; padding: 15px; background: #fff8e1; border: 1px solid #ffa726; border-radius: 5px; }
+    .warning { color: red; font-weight: bold; }
+    .ok { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>使用量差異計算器</h2>
+
+  <label for="productType">商品類型：</label>
+  <select id="productType" onchange="updateBaseWeight()">
+    <option value="1000">牛筋 / 牛肉（1000 克/包）</option>
+    <option value="800">春雨（800 克/包）</option>
+  </select>
+
+  <label for="estimated">試算使用量 (克):</label>
+  <input type="number" id="estimated" step="0.01">
+
+  <label for="actual">實際使用量 (克):</label>
+  <input type="number" id="actual" step="0.01">
+
+  <button onclick="calculate()">計算差異</button>
+
+  <div class="result" id="output" style="display:none;"></div>
+
+  <script>
+    let baseWeight = 1000;
+
+    function updateBaseWeight() {
+      baseWeight = parseInt(document.getElementById("productType").value);
+    }
+
+    function calculate() {
+      const estimated = parseFloat(document.getElementById("estimated").value);
+      const actual = parseFloat(document.getElementById("actual").value);
+
+      if (isNaN(estimated) || isNaN(actual) || estimated === 0) {
+        alert("請輸入有效數字，且試算使用量不能為 0");
+        return;
+      }
+
+      const diffGramRaw = actual - estimated;
+      const diffGramText = diffGramRaw > 0
+        ? `+${Math.abs(diffGramRaw).toFixed(2)} 克（多給）`
+        : `-${Math.abs(diffGramRaw).toFixed(2)} 克（少給）`;
+
+      const diffPercentRaw = (diffGramRaw / estimated) * 100;
+      const diffPercentText = `${diffPercentRaw > 0 ? '+' : ''}${diffPercentRaw.toFixed(2)}%`;
+
+      const diffClass = Math.abs(diffPercentRaw) > 10 ? "warning" : "ok";
+      const diffMessage = Math.abs(diffPercentRaw) > 10
+        ? "⚠ 差異值過大，請確認試算量是否正確"
+        : "✓ 差異值在可接受範圍內";
+
+      // 四個建議值
+      const targetPlus10 = estimated * 1.10;
+      const targetPlus5 = estimated * 1.05;
+      const targetMinus5 = estimated * 0.95;
+      const targetMinus10 = estimated * 0.90;
+
+      document.getElementById("output").style.display = "block";
+      document.getElementById("output").innerHTML = `
+        <strong>結果：</strong><br>
+        差異克數：${diffGramText}<br>
+        差異值：<span class="${diffClass}">${diffPercentText}</span><br>
+        <span class="${diffClass}">${diffMessage}</span><br><br>
+        ➤ 若要讓差異值為 +10%，實際使用量應為：約 <strong>${targetPlus10.toFixed(2)} 克</strong><br>
+        ➤ 若要讓差異值為 +5%，實際使用量應為：約 <strong>${targetPlus5.toFixed(2)} 克</strong><br>
+        ➤ 若要讓差異值為 -5%，實際使用量應為：約 <strong>${targetMinus5.toFixed(2)} 克</strong><br>
+        ➤ 若要讓差異值為 -10%，實際使用量應為：約 <strong>${targetMinus10.toFixed(2)} 克</strong><br><br>
+        <em>※目前商品每包重量為 ${baseWeight} 克</em>
+      `;
+    }
+  </script>
+</body>
+</html>
