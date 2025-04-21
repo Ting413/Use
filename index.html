@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>使用量差異計算器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,24 +11,23 @@
       background: #fdf8f3;
       font-size: 18px;
       line-height: 1.6;
-      max-width: 500px;
+      max-width: 600px;
       margin: auto;
     }
-  
+
     label {
       font-weight: bold;
       margin-top: 20px;
     }
-  
+
     input, select {
       font-size: 18px;
       padding: 8px 12px;
       width: 100%;
-      max-width: 100%;
       box-sizing: border-box;
       margin-top: 5px;
     }
-  
+
     button {
       font-size: 18px;
       padding: 10px 20px;
@@ -37,32 +37,50 @@
       border: none;
       border-radius: 4px;
       color: #fff;
+      width: 100%;
     }
-  
+
     .result {
-  margin-top: 25px;
-  padding: 15px;
-  background: #fff8e1;
-  border: 1px solid #ffa726;
-  border-radius: 5px;
-  font-size: 17px;
-  width: 150%;
-  white-space: normal;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-  
+      margin-top: 25px;
+      padding: 15px;
+      background: #fff8e1;
+      border: 1px solid #ffa726;
+      border-radius: 5px;
+      font-size: 17px;
+    }
+
     .warning {
       color: red;
       font-weight: bold;
     }
-  
+
     .ok {
       color: green;
       font-weight: bold;
     }
+
+    .target-table {
+      width: 100%;
+      border-spacing: 0;
+      font-size: 17px;
+      margin-top: 10px;
+    }
+
+    .target-table td {
+      padding: 6px 8px;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    .target-table td:first-child {
+      width: 45%;
+      font-weight: bold;
+    }
+
+    .target-table td:last-child {
+      text-align: right;
+    }
   </style>
-  
 </head>
 <body>
   <h2>使用量差異計算器</h2>
@@ -112,7 +130,6 @@
         ? "⚠ 差異值過大，請確認試算量是否正確"
         : "✓ 差異值在可接受範圍內";
 
-      // 四個建議值
       const targetPlus10 = estimated * 1.10;
       const targetPlus5 = estimated * 1.05;
       const targetMinus5 = estimated * 0.95;
@@ -124,11 +141,15 @@
         差異克數：${diffGramText}<br>
         差異值：<span class="${diffClass}">${diffPercentText}</span><br>
         <span class="${diffClass}">${diffMessage}</span><br><br>
-        ➤ 若要讓差異值為 +10%，實際使用量應為：約 <strong>${targetPlus10.toFixed(2)} 克</strong><br>
-        ➤ 若要讓差異值為 +5%，實際使用量應為：約 <strong>${targetPlus5.toFixed(2)} 克</strong><br>
-        ➤ 若要讓差異值為 -5%，實際使用量應為：約 <strong>${targetMinus5.toFixed(2)} 克</strong><br>
-        ➤ 若要讓差異值為 -10%，實際使用量應為：約 <strong>${targetMinus10.toFixed(2)} 克</strong><br><br>
-        <em>※目前商品每包重量為 ${baseWeight} 克</em>
+
+        <table class="target-table">
+          <tr><td>差異值 +10%</td><td>應為 <strong>${targetPlus10.toFixed(2)} 克</strong></td></tr>
+          <tr><td>差異值 +5%</td><td>應為 <strong>${targetPlus5.toFixed(2)} 克</strong></td></tr>
+          <tr><td>差異值 -5%</td><td>應為 <strong>${targetMinus5.toFixed(2)} 克</strong></td></tr>
+          <tr><td>差異值 -10%</td><td>應為 <strong>${targetMinus10.toFixed(2)} 克</strong></td></tr>
+        </table>
+
+        <br><em>※目前商品每包重量為 ${baseWeight} 克</em>
       `;
     }
   </script>
