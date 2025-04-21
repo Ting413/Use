@@ -10,7 +10,6 @@
       padding: 30px;
       background: #fdf8f3;
       font-size: 18px;
-      line-height: 1.6;
       max-width: 600px;
       margin: auto;
     }
@@ -22,22 +21,22 @@
 
     input, select {
       font-size: 18px;
-      padding: 8px 12px;
+      padding: 8px;
       width: 100%;
-      box-sizing: border-box;
       margin-top: 5px;
+      box-sizing: border-box;
     }
 
     button {
       font-size: 18px;
-      padding: 10px 20px;
+      padding: 10px;
       margin-top: 20px;
-      cursor: pointer;
+      width: 100%;
       background-color: #ffa726;
+      color: white;
       border: none;
       border-radius: 4px;
-      color: #fff;
-      width: 100%;
+      cursor: pointer;
     }
 
     .result {
@@ -46,112 +45,106 @@
       background: #fff8e1;
       border: 1px solid #ffa726;
       border-radius: 5px;
-      font-size: 17px;
     }
 
-    .warning {
-      color: red;
-      font-weight: bold;
-    }
+    .warning { color: red; font-weight: bold; }
+    .ok { color: green; font-weight: bold; }
 
-    .ok {
-      color: green;
-      font-weight: bold;
-    }
-
-    .target-table {
-      width: 100%;
-      border-spacing: 0;
-      font-size: 17px;
-      margin-top: 10px;
-    }
-
-    .target-table td {
-      padding: 6px 8px;
-      vertical-align: top;
-      white-space: nowrap;
-    }
-
-    .target-table td:first-child {
-      width: 45%;
-      font-weight: bold;
-    }
-
-    .target-table td:last-child {
-      text-align: right;
+    .suggestion {
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
   <h2>使用量差異計算器</h2>
 
-  <label for="productType">商品類型：</label>
-  <select id="productType" onchange="updateBaseWeight()">
-    <option value="1000">牛筋 / 牛肉（1000 克/包）</option>
-    <option value="800">春雨（800 克/包）</option>
+  <label>商品類型：</label>
+  <select id="productType" onchange="updateUnitWeight()">
+    <option value="1000">牛筋 / 牛肉（一包 1000 克）</option>
+    <option value="800">春雨（一包 800 克）</option>
   </select>
 
-  <label for="estimated">試算使用量 (克):</label>
-  <input type="number" id="estimated" step="0.01">
+  <label>試算使用量 (克)：</label>
+  <input type="number" id="estimated">
 
-  <label for="actual">實際使用量 (克):</label>
-  <input type="number" id="actual" step="0.01">
+  <label>前日剩餘量 (克)：</label>
+  <input type="number" id="prevRemain">
+
+  <label>今日包數：</label>
+  <input type="number" id="packageCount" oninput="updateTodayAdded()">
+
+  <label>今日進貨量 (克)：</label>
+  <input type="number" id="todayAdded" readonly style="background-color:#f0f0f0;">
+
+  <label>今日剩餘量 (克)：</label>
+  <input type="number" id="todayRemain">
 
   <button onclick="calculate()">計算差異</button>
 
   <div class="result" id="output" style="display:none;"></div>
 
   <script>
-    let baseWeight = 1000;
+    let unitWeight = 1000;
 
-    function updateBaseWeight() {
-      baseWeight = parseInt(document.getElementById("productType").value);
+    function updateUnitWeight() {
+      unitWeight = parseInt(document.getElementById("productType").value);
+      updateTodayAdded();
+    }
+
+    function updateTodayAdded() {
+      const count = parseFloat(document.getElementById("packageCount").value);
+      const total = !isNaN(count) ? count * unitWeight : 0;
+      document.getElementById("todayAdded").value = total.toFixed(2);
     }
 
     function calculate() {
       const estimated = parseFloat(document.getElementById("estimated").value);
-      const actual = parseFloat(document.getElementById("actual").value);
+      const prevRemain = parseFloat(document.getElementById("prevRemain").value);
+      const todayAdded = parseFloat(document.getElementById("todayAdded").value);
+      const todayRemain = parseFloat(document.getElementById("todayRemain").value);
 
-      if (isNaN(estimated) || isNaN(actual) || estimated === 0) {
-        alert("請輸入有效數字，且試算使用量不能為 0");
+      if ([estimated, prevRemain, todayAdded, todayRemain].some(isNaN)) {
+        alert("請輸入所有數值！");
         return;
       }
 
-      const diffGramRaw = actual - estimated;
-      const diffGramText = diffGramRaw > 0
-        ? `+${Math.abs(diffGramRaw).toFixed(2)} 克（多給）`
-        : `-${Math.abs(diffGramRaw).toFixed(2)} 克（少給）`;
+      const actual = prevRemain + todayAdded - todayRemain;
+      const diff = actual - estimated;
+      const diffPercent = (diff / estimated) * 100;
 
-      const diffPercentRaw = (diffGramRaw / estimated) * 100;
-      const diffPercentText = `${diffPercentRaw > 0 ? '+' : ''}${diffPercentRaw.toFixed(2)}%`;
+      const targetActual_p10 = estimated * 1.10;
+      const targetActual_p5  = estimated * 1.05;
+      const targetActual_m5  = estimated * 0.95;
+      const targetActual_m10 = estimated * 0.90;
 
-      const diffClass = Math.abs(diffPercentRaw) > 10 ? "warning" : "ok";
-      const diffMessage = Math.abs(diffPercentRaw) > 10
-        ? "⚠ 差異值過大，請確認試算量是否正確"
-        : "✓ 差異值在可接受範圍內";
+      const totalAvailable = prevRemain + todayAdded;
 
-      const targetPlus10 = estimated * 1.10;
-      const targetPlus5 = estimated * 1.05;
-      const targetMinus5 = estimated * 0.95;
-      const targetMinus10 = estimated * 0.90;
+      const remain_p10 = totalAvailable - targetActual_p10;
+      const remain_p5  = totalAvailable - targetActual_p5;
+      const remain_m5  = totalAvailable - targetActual_m5;
+      const remain_m10 = totalAvailable - targetActual_m10;
+
+      const diffClass = Math.abs(diffPercent) > 10 ? "warning" : "ok";
 
       document.getElementById("output").style.display = "block";
       document.getElementById("output").innerHTML = `
-        <strong>結果：</strong><br>
-        差異克數：${diffGramText}<br>
-        差異值：<span class="${diffClass}">${diffPercentText}</span><br>
-        <span class="${diffClass}">${diffMessage}</span><br><br>
+        <strong>計算結果：</strong><br>
+        ➤ 實際使用量：${actual.toFixed(2)} 克<br>
+        ➤ 差異克數：${diff >= 0 ? "+" : ""}${diff.toFixed(2)} 克<br>
+        ➤ 差異值：<span class="${diffClass}">${diffPercent.toFixed(2)}%</span><br>
 
-        <table class="target-table">
-          <tr><td>差異值 +10%</td><td>應為 <strong>${targetPlus10.toFixed(2)} 克</strong></td></tr>
-          <tr><td>差異值 +5%</td><td>應為 <strong>${targetPlus5.toFixed(2)} 克</strong></td></tr>
-          <tr><td>差異值 -5%</td><td>應為 <strong>${targetMinus5.toFixed(2)} 克</strong></td></tr>
-          <tr><td>差異值 -10%</td><td>應為 <strong>${targetMinus10.toFixed(2)} 克</strong></td></tr>
-        </table>
-
-        <br><em>※目前商品每包重量為 ${baseWeight} 克</em>
+        <div class="suggestion">
+          <strong>若要控制在特定差異值，今日剩餘應為：</strong><br>
+          ➤ 差異值 +10%：${remain_p10.toFixed(2)} 克<br>
+          ➤ 差異值 +5%：${remain_p5.toFixed(2)} 克<br>
+          ➤ 差異值 -5%：${remain_m5.toFixed(2)} 克<br>
+          ➤ 差異值 -10%：${remain_m10.toFixed(2)} 克<br>
+        </div>
       `;
     }
+
+    // 初始化
+    updateTodayAdded();
   </script>
 </body>
 </html>
